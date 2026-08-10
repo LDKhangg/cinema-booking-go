@@ -6,14 +6,6 @@ import (
 	"time"
 )
 
-type Service interface {
-	CreateMovie(ctx context.Context, m *Movie) error
-	GetMovieById(ctx context.Context, id int) (Movie, error)
-	UpdateMovie(ctx context.Context, m *Movie) error
-	GetMovies(ctx context.Context) ([]Movie, error)
-	DeleteMovie(ctx context.Context, id int) error
-}
-
 type movieService struct {
 	repo Repository
 }

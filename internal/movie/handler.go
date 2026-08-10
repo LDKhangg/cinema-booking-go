@@ -47,7 +47,7 @@ func (h *handler) GetMovies(resp http.ResponseWriter, req *http.Request) {
 }
 
 func (h *handler) GetMovieById(resp http.ResponseWriter, req *http.Request) {
-	idStr := strings.TrimPrefix(req.URL.Path, "/movies/")
+	idStr := req.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		http.Error(resp, "ID phim không hợp lệ", http.StatusBadRequest)
