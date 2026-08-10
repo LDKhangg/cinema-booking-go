@@ -67,12 +67,13 @@ func (p *postgresRepository) Delete(ctx context.Context, id int) error {
 
 func (p *postgresRepository) GetByID(ctx context.Context, id int) (Movie, error) {
 	query := `
-		SELECT id, title, decsription, release_date, closed_date, is_published, created_at, updated_at
+		SELECT id, title, description, release_date, closed_date, is_published, created_at, updated_at
 		FROM movies
 		WHERE id = $1
 	`
 	var m Movie
 	err := p.db.QueryRowContext(ctx, query, id).Scan(
+		&m.ID,
 		&m.Title,
 		&m.Description,
 		&m.ReleaseDate,
@@ -92,7 +93,7 @@ func (p *postgresRepository) GetByID(ctx context.Context, id int) (Movie, error)
 
 func (p *postgresRepository) GetPublishedMovies(ctx context.Context) ([]Movie, error) {
 	query := `
-	SELECT id, title, decsription, release_date, closed_date, is_published, created_at, updated_at
+	SELECT id, title, description, release_date, closed_date, is_published, created_at, updated_at
 	FROM movies
 	WHERE is_published = true
 	ORDER BY release_date
