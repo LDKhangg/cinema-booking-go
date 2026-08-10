@@ -7,6 +7,7 @@ import (
 	"github.com/LDKhangg/cinema-booking-go/internal/movie"
 	"github.com/LDKhangg/cinema-booking-go/internal/showtime"
 	"github.com/LDKhangg/cinema-booking-go/internal/theater"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 
 func SetupRouter(db *sql.DB) *http.ServeMux {
@@ -45,5 +46,7 @@ func SetupRouter(db *sql.DB) *http.ServeMux {
 	mux.HandleFunc("POST /showtimes", showtimeHandler.CreateShowtime)
 	mux.HandleFunc("GET /showtimes/{id}", showtimeHandler.GetShowtimeByID)
 
+	// Api document
+	mux.HandleFunc("GET /swagger/*", httpSwagger.WrapHandler)
 	return mux
 }

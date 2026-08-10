@@ -16,6 +16,14 @@ func NewHandler(service Service) *handler {
 	return &handler{theaterService: service}
 }
 
+// GetTheaters godoc
+//
+// @Summary Lấy danh sách rạp chiếu
+// @Tags theaters
+// @Produce json
+// @Success 200 {array} Theater
+// @Failure 500 {object} map[string]string
+// @Router /theaters [get]
 func (h *handler) GetTheaters(w http.ResponseWriter, r *http.Request) {
 	theaters, err := h.theaterService.GetTheaters(r.Context())
 	if err != nil {
@@ -25,6 +33,16 @@ func (h *handler) GetTheaters(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusOK, theaters)
 }
 
+// GetTheaterByID godoc
+//
+// @Summary Lấy rạp chiếu theo ID
+// @Tags theaters
+// @Produce json
+// @Param id path int true "ID rạp"
+// @Success 200 {object} Theater
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /theaters/{id} [get]
 func (h *handler) GetTheaterByID(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
@@ -40,6 +58,17 @@ func (h *handler) GetTheaterByID(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusOK, theater)
 }
 
+// CreateTheater godoc
+//
+// @Summary Tạo rạp chiếu mới
+// @Tags theaters
+// @Accept json
+// @Produce json
+// @Param theater body Theater true "Thông tin rạp"
+// @Success 201 {object} Theater
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /theaters [post]
 func (h *handler) CreateTheater(w http.ResponseWriter, r *http.Request) {
 	var t Theater
 	if err := json.NewDecoder(r.Body).Decode(&t); err != nil {
@@ -53,6 +82,16 @@ func (h *handler) CreateTheater(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusCreated, t)
 }
 
+// GetRoomsByTheaterID godoc
+//
+// @Summary Lấy danh sách phòng chiếu của rạp
+// @Tags rooms
+// @Produce json
+// @Param id path int true "ID rạp"
+// @Success 200 {array} Room
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /theaters/{id}/rooms [get]
 func (h *handler) GetRoomsByTheaterID(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
@@ -68,6 +107,17 @@ func (h *handler) GetRoomsByTheaterID(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusOK, rooms)
 }
 
+// CreateRoom godoc
+//
+// @Summary Tạo phòng chiếu mới
+// @Tags rooms
+// @Accept json
+// @Produce json
+// @Param room body Room true "Thông tin phòng chiếu"
+// @Success 201 {object} Room
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /theaters/rooms [post]
 func (h *handler) CreateRoom(w http.ResponseWriter, r *http.Request) {
 	var rm Room
 	if err := json.NewDecoder(r.Body).Decode(&rm); err != nil {
@@ -86,6 +136,18 @@ type CreateSeatsRequest struct {
 	SeatsPerRow int `json:"seats_per_row"`
 }
 
+// CreateSeats godoc
+//
+// @Summary Tạo danh sách ghế cho phòng chiếu
+// @Tags seats
+// @Accept json
+// @Produce json
+// @Param id path int true "ID phòng chiếu"
+// @Param request body CreateSeatsRequest true "Số hàng và số ghế mỗi hàng"
+// @Success 201 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /rooms/{id}/seats [post]
 func (h *handler) CreateSeats(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	roomID, err := strconv.Atoi(idStr)
@@ -105,6 +167,16 @@ func (h *handler) CreateSeats(w http.ResponseWriter, r *http.Request) {
 	response.Success(w, http.StatusCreated, "Tạo ghế thành công", nil)
 }
 
+// GetSeatsByRoomID godoc
+//
+// @Summary Lấy danh sách ghế của phòng chiếu
+// @Tags seats
+// @Produce json
+// @Param id path int true "ID phòng chiếu"
+// @Success 200 {array} Seat
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /rooms/{id}/seats [get]
 func (h *handler) GetSeatsByRoomID(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	roomID, err := strconv.Atoi(idStr)

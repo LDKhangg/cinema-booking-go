@@ -1,0 +1,572 @@
+basePath: /
+definitions:
+  movie.Movie:
+    properties:
+      closed_date:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      is_published:
+        type: boolean
+      release_date:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  showtime.Showtime:
+    properties:
+      created_at:
+        type: string
+      end_time:
+        type: string
+      id:
+        type: integer
+      movie_id:
+        type: integer
+      price:
+        type: number
+      room_id:
+        type: integer
+      start_time:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  theater.CreateSeatsRequest:
+    properties:
+      rows:
+        type: integer
+      seats_per_row:
+        type: integer
+    type: object
+  theater.Room:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      room_type:
+        type: string
+      theather_id:
+        type: integer
+      total_seats:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  theater.Seat:
+    properties:
+      id:
+        type: integer
+      number:
+        type: integer
+      room_id:
+        type: integer
+      row_line:
+        type: string
+      seat_type:
+        type: string
+    type: object
+  theater.Theater:
+    properties:
+      address:
+        type: string
+      city:
+        type: string
+      created_at:
+        type: string
+      jd:
+        type: integer
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: 'API quản lý đặt vé xem phim: phim, rạp chiếu, phòng chiếu, ghế và
+    suất chiếu'
+  title: Cinema Booking API
+  version: "1.0"
+paths:
+  /movies:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/movie.Movie'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Lấy danh sách phim đang công chiếu
+      tags:
+      - movies
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Thông tin phim
+        in: body
+        name: movie
+        required: true
+        schema:
+          $ref: '#/definitions/movie.Movie'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/movie.Movie'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Tạo phim mới
+      tags:
+      - movies
+  /movies/{id}:
+    delete:
+      parameters:
+      - description: ID phim
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Xóa phim
+      tags:
+      - movies
+    get:
+      parameters:
+      - description: ID phim
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/movie.Movie'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Lấy phim theo ID
+      tags:
+      - movies
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID phim
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Thông tin phim cập nhật
+        in: body
+        name: movie
+        required: true
+        schema:
+          $ref: '#/definitions/movie.Movie'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Cập nhật thông tin phim
+      tags:
+      - movies
+  /rooms/{id}/seats:
+    get:
+      parameters:
+      - description: ID phòng chiếu
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/theater.Seat'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Lấy danh sách ghế của phòng chiếu
+      tags:
+      - seats
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID phòng chiếu
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Số hàng và số ghế mỗi hàng
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/theater.CreateSeatsRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Tạo danh sách ghế cho phòng chiếu
+      tags:
+      - seats
+  /showtimes:
+    get:
+      parameters:
+      - description: ID phim
+        in: query
+        name: movie_id
+        type: integer
+      - description: ID rạp
+        in: query
+        name: theater_id
+        type: integer
+      - description: Ngày chiếu (YYYY-MM-DD)
+        in: query
+        name: date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/showtime.Showtime'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Lấy danh sách suất chiếu theo phim hoặc rạp
+      tags:
+      - showtimes
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Thông tin suất chiếu
+        in: body
+        name: showtime
+        required: true
+        schema:
+          $ref: '#/definitions/showtime.Showtime'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/showtime.Showtime'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Tạo suất chiếu mới
+      tags:
+      - showtimes
+  /showtimes/{id}:
+    get:
+      parameters:
+      - description: ID suất chiếu
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/showtime.Showtime'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Lấy suất chiếu theo ID
+      tags:
+      - showtimes
+  /theaters:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/theater.Theater'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Lấy danh sách rạp chiếu
+      tags:
+      - theaters
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Thông tin rạp
+        in: body
+        name: theater
+        required: true
+        schema:
+          $ref: '#/definitions/theater.Theater'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/theater.Theater'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Tạo rạp chiếu mới
+      tags:
+      - theaters
+  /theaters/{id}:
+    get:
+      parameters:
+      - description: ID rạp
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/theater.Theater'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Lấy rạp chiếu theo ID
+      tags:
+      - theaters
+  /theaters/{id}/rooms:
+    get:
+      parameters:
+      - description: ID rạp
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/theater.Room'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Lấy danh sách phòng chiếu của rạp
+      tags:
+      - rooms
+  /theaters/rooms:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Thông tin phòng chiếu
+        in: body
+        name: room
+        required: true
+        schema:
+          $ref: '#/definitions/theater.Room'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/theater.Room'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Tạo phòng chiếu mới
+      tags:
+      - rooms
+swagger: "2.0"
