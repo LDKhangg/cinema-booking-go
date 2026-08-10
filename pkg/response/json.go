@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func JSON(w http.ResponseWriter, status int, data interface{}) {
+func JSON(w http.ResponseWriter, status int, data any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	if data != nil {
@@ -17,8 +17,8 @@ func Error(w http.ResponseWriter, status int, message string) {
 	JSON(w, status, map[string]string{"error": message})
 }
 
-func Success(w http.ResponseWriter, status int, message string, data interface{}) {
-	payload := map[string]interface{}{}
+func Success(w http.ResponseWriter, status int, message string, data any) {
+	payload := map[string]any{}
 	if message != "" {
 		payload["message"] = message
 	}
