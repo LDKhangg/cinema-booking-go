@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+
+	"github.com/LDKhangg/cinema-booking-go/pkg/response"
 )
 
 type handler struct {
@@ -17,76 +19,66 @@ func NewHandler(service Service) *handler {
 func (h *handler) GetTheaters(w http.ResponseWriter, r *http.Request) {
 	theaters, err := h.theaterService.GetTheaters(r.Context())
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		response.Error(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(theaters)
+	response.JSON(w, http.StatusOK, theaters)
 }
 
 func (h *handler) GetTheaterByID(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "ID rạp không hợp lệ", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, "ID rạp không hợp lệ")
 		return
 	}
 	theater, err := h.theaterService.GetTheaterByID(r.Context(), id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		response.Error(w, http.StatusNotFound, err.Error())
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(theater)
+	response.JSON(w, http.StatusOK, theater)
 }
 
 func (h *handler) CreateTheater(w http.ResponseWriter, r *http.Request) {
 	var t Theater
 	if err := json.NewDecoder(r.Body).Decode(&t); err != nil {
-		http.Error(w, "Dữ liệu đầu vào không hợp lệ", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, "Dữ liệu đầu vào không hợp lệ")
 		return
 	}
 	if err := h.theaterService.CreateTheater(r.Context(), &t); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		response.Error(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(t)
+	response.JSON(w, http.StatusCreated, t)
 }
 
 func (h *handler) GetRoomsByTheaterID(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "ID rạp không hợp lệ", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, "ID rạp không hợp lệ")
 		return
 	}
 	rooms, err := h.theaterService.GetRoomsByTheaterID(r.Context(), id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		response.Error(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(rooms)
+	response.JSON(w, http.StatusOK, rooms)
 }
 
 func (h *handler) CreateRoom(w http.ResponseWriter, r *http.Request) {
 	var rm Room
 	if err := json.NewDecoder(r.Body).Decode(&rm); err != nil {
-		http.Error(w, "Dữ liệu đầu vào không hợp lệ", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, "Dữ liệu đầu vào không hợp lệ")
 		return
 	}
 	if err := h.theaterService.CreateRoom(r.Context(), &rm); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		response.Error(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(rm)
+	response.JSON(w, http.StatusCreated, rm)
 }
 
 type CreateSeatsRequest struct {
@@ -98,36 +90,32 @@ func (h *handler) CreateSeats(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	roomID, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "ID phòng không hợp lệ", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, "ID phòng không hợp lệ")
 		return
 	}
 	var req CreateSeatsRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Dữ liệu đầu vào không hợp lệ", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, "Dữ liệu đầu vào không hợp lệ")
 		return
 	}
 	if err := h.theaterService.CreateSeats(r.Context(), roomID, req.Rows, req.SeatsPerRow); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		response.Error(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte(`{"message": "Tạo ghế thành công"}`))
+	response.Success(w, http.StatusCreated, "Tạo ghế thành công", nil)
 }
 
 func (h *handler) GetSeatsByRoomID(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	roomID, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "ID phòng không hợp lệ", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, "ID phòng không hợp lệ")
 		return
 	}
 	seats, err := h.theaterService.GetSeatsByRoomID(r.Context(), roomID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		response.Error(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(seats)
+	response.JSON(w, http.StatusOK, seats)
 }

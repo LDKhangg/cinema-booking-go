@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/LDKhangg/cinema-booking-go/pkg/response"
 )
 
 type handler struct {
@@ -18,33 +20,29 @@ func NewHandler(service Service) *handler {
 func (h *handler) CreateShowtime(w http.ResponseWriter, r *http.Request) {
 	var st Showtime
 	if err := json.NewDecoder(r.Body).Decode(&st); err != nil {
-		http.Error(w, "Dữ liệu đầu vào không hợp lệ", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, "Dữ liệu đầu vào không hợp lệ")
 		return
 	}
 	if err := h.showtimeService.CreateShowtime(r.Context(), &st); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		response.Error(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(st)
+	response.JSON(w, http.StatusCreated, st)
 }
 
 func (h *handler) GetShowtimeByID(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "ID suất chiếu không hợp lệ", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, "ID suất chiếu không hợp lệ")
 		return
 	}
 	st, err := h.showtimeService.GetShowtimeByID(r.Context(), id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		response.Error(w, http.StatusNotFound, err.Error())
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(st)
+	response.JSON(w, http.StatusOK, st)
 }
 
 func (h *handler) GetShowtimes(w http.ResponseWriter, r *http.Request) {
@@ -57,7 +55,7 @@ func (h *handler) GetShowtimes(w http.ResponseWriter, r *http.Request) {
 	if dateStr != "" {
 		targetDate, err = time.Parse("2006-01-02", dateStr)
 		if err != nil {
-			http.Error(w, "Định dạng ngày không hợp lệ (YYYY-MM-DD)", http.StatusBadRequest)
+			response.Error(w, http.StatusBadRequest, "Định dạng ngày không hợp lệ (YYYY-MM-DD)")
 			return
 		}
 	} else {
@@ -68,31 +66,29 @@ func (h *handler) GetShowtimes(w http.ResponseWriter, r *http.Request) {
 	if movieIDStr != "" {
 		movieID, err := strconv.Atoi(movieIDStr)
 		if err != nil {
-			http.Error(w, "ID phim không hợp lệ", http.StatusBadRequest)
+			response.Error(w, http.StatusBadRequest, "ID phim không hợp lệ")
 			return
 		}
 		showtimes, err = h.showtimeService.GetShowtimesByMovie(r.Context(), movieID, targetDate)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			response.Error(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 	} else if theaterIDStr != "" {
 		theaterID, err := strconv.Atoi(theaterIDStr)
 		if err != nil {
-			http.Error(w, "ID rạp không hợp lệ", http.StatusBadRequest)
+			response.Error(w, http.StatusBadRequest, "ID rạp không hợp lệ")
 			return
 		}
 		showtimes, err = h.showtimeService.GetShowtimesByTheater(r.Context(), theaterID, targetDate)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			response.Error(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 	} else {
-		http.Error(w, "Vui lòng cung cấp movie_id hoặc theater_id", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, "Vui lòng cung cấp movie_id hoặc theater_id")
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(showtimes)
+	response.JSON(w, http.StatusOK, showtimes)
 }
