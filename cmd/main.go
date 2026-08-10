@@ -6,7 +6,9 @@ import (
 	"net/http"
 
 	"github.com/LDKhangg/cinema-booking-go/internal/server"
+	"github.com/LDKhangg/cinema-booking-go/migrations"
 	"github.com/LDKhangg/cinema-booking-go/pkg/database"
+	"github.com/pressly/goose/v3"
 )
 
 func main() {
@@ -15,6 +17,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("Không thể kết nối DB: %v", err)
 	}
+
+	goose.SetBaseFS(migrations.FS)
+
+	if err := goose.Up(db, "."); err != nil {
+		log.Fatalf("Lỗi khi chạy Migration: %v", err)
+	}
+	fmt.Println("Đã kiểm tra và chạy Migration (nếu có) thành công!")
 
 	defer db.Close()
 	fmt.Println("Connected DB")

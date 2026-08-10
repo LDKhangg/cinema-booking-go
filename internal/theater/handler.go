@@ -1,4 +1,4 @@
-package theather
+package theater
 
 import (
 	"encoding/json"

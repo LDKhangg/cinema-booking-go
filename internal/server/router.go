@@ -24,9 +24,9 @@ func SetupRouter(db *sql.DB) *http.ServeMux {
 	mux.HandleFunc("DELETE /movies/{id}", movieHandler.DeleteMovie)
 
 	// Theater routes
-	theaterRepo := theather.NewRepository(db)
-	theaterService := theather.NewService(theaterRepo)
-	theaterHandler := theather.NewHandler(theaterService)
+	theaterRepo := theater.NewRepository(db)
+	theaterService := theater.NewService(theaterRepo)
+	theaterHandler := theater.NewHandler(theaterService)
 
 	mux.HandleFunc("GET /theaters", theaterHandler.GetTheaters)
 	mux.HandleFunc("POST /theaters", theaterHandler.CreateTheater)

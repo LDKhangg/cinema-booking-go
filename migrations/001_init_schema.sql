@@ -1,54 +1,65 @@
--- Enable UUID or standard serial IDs
--- Movies table
-CREATE TABLE IF NOT EXISTS movies (
+-- +goose Up
+-- +goose StatementBegin
+
+-- 1. Bảng cho Domain Movie
+CREATE TABLE movies (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT,
-    release_date TIMESTAMP WITH TIME ZONE,
-    closed_date TIMESTAMP WITH TIME ZONE,
-    is_published BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    release_date TIMESTAMP,
+    closed_date TIMESTAMP,
+    is_published BOOLEAN DEFAULT false,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Theaters table
-CREATE TABLE IF NOT EXISTS theaters (
+-- 2. Bảng cho Domain Theater
+CREATE TABLE theaters (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    address VARCHAR(255) NOT NULL,
+    address TEXT NOT NULL,
     city VARCHAR(100) NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Rooms table
-CREATE TABLE IF NOT EXISTS rooms (
+CREATE TABLE rooms (
     id SERIAL PRIMARY KEY,
-    theater_id INT NOT NULL REFERENCES theaters(id) ON DELETE CASCADE,
+    theater_id INT REFERENCES theaters(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
     total_seats INT NOT NULL,
-    room_type VARCHAR(50) DEFAULT 'standard',
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    room_type VARCHAR(50) DEFAULT '2D',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Seats table
-CREATE TABLE IF NOT EXISTS seats (
+CREATE TABLE seats (
     id SERIAL PRIMARY KEY,
-    room_id INT NOT NULL REFERENCES rooms(id) ON DELETE CASCADE,
+    room_id INT REFERENCES rooms(id) ON DELETE CASCADE,
     row_line VARCHAR(10) NOT NULL,
     number INT NOT NULL,
     seat_type VARCHAR(50) DEFAULT 'standard'
 );
 
--- Showtimes table
-CREATE TABLE IF NOT EXISTS showtimes (
+-- 3. Bảng cho Domain Showtime
+CREATE TABLE showtimes (
     id SERIAL PRIMARY KEY,
-    movie_id INT NOT NULL REFERENCES movies(id) ON DELETE CASCADE,
-    room_id INT NOT NULL REFERENCES rooms(id) ON DELETE CASCADE,
-    start_time TIMESTAMP WITH TIME ZONE NOT NULL,
-    end_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    movie_id INT REFERENCES movies(id) ON DELETE CASCADE,
+    room_id INT REFERENCES rooms(id) ON DELETE CASCADE,
+    start_time TIMESTAMP NOT NULL,
+    end_time TIMESTAMP NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+-- +goose StatementEnd
+
+
+-- +goose Down
+-- +goose StatementBegin
+DROP TABLE IF EXISTS showtimes;
+DROP TABLE IF EXISTS seats;
+DROP TABLE IF EXISTS rooms;
+DROP TABLE IF EXISTS theaters;
+DROP TABLE IF EXISTS movies;
+-- +goose StatementEnd

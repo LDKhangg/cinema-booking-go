@@ -31,11 +31,9 @@ func (s *showtimeService) CreateShowtime(ctx context.Context, st *Showtime) erro
 		return errors.New("giá vé phải lớn hơn 0")
 	}
 
-	// Check for schedule conflict in the same room on the same day
 	existing, err := s.repo.GetByRoomID(ctx, st.RoomID, st.StartTime)
 	if err == nil {
 		for _, ex := range existing {
-			// Check overlap: (StartA < EndB) and (EndA > StartB)
 			if st.StartTime.Before(ex.EndTime) && st.EndTime.After(ex.StartTime) {
 				return errors.New("lịch chiếu bị trùng với suất chiếu khác trong cùng phòng")
 			}
