@@ -1,0 +1,5 @@
+.serena/
+docs/
+*.DS_Store
+bin/
+tmp/
