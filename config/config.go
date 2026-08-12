@@ -35,5 +35,8 @@ func normalizePort(port string) string {
 	if value == "" {
 		return ":8080"
 	}
-	return value
+	if strings.HasPrefix(value, ":") {
+		return value
+	}
+	return ":" + value
 }

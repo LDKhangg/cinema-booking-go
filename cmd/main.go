@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/LDKhangg/cinema-booking-go/config"
 	_ "github.com/LDKhangg/cinema-booking-go/docs"
 	"github.com/LDKhangg/cinema-booking-go/internal/server"
 	"github.com/LDKhangg/cinema-booking-go/migrations"
@@ -18,11 +19,15 @@ import (
 // @host localhost:8080
 // @BasePath /
 func main() {
-	dsn := "postgres://postgres:123456@localhost:5432/cinema_db?sslmode=disable"
-	db, err := database.NewPostgresDB(dsn)
+	cfg, err := config.Load()
 	if err != nil {
-		log.Fatalf("Không thể kết nối DB: %v", err)
+		log.Fatal(err)
 	}
+	db, err := database.NewPostgresDB(cfg.DatabaseDSN)
+	if err != nil {
+		log.Fatal("failed to connect db ", err)
+	}
+	defer db.Close()
 
 	goose.SetBaseFS(migrations.FS)
 
@@ -31,13 +36,12 @@ func main() {
 	}
 	fmt.Println("Đã kiểm tra và chạy Migration (nếu có) thành công!")
 
-	defer db.Close()
 	fmt.Println("Connected DB")
-	route := server.SetupRouter(db)
-	port := ":8080"
-	fmt.Printf("Server running on port: %s", port)
+	router := server.SetupRouter(db)
 
-	if err := http.ListenAndServe(port, route); err != nil {
-		log.Fatalf("Error when start server %v", err)
+	log.Println("Server đang chạy tại", cfg.Port)
+	if err := http.ListenAndServe(cfg.Port, router); err != nil {
+		log.Fatal("Khởi động server thất bại: ", err)
 	}
 }
+
