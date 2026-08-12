@@ -56,7 +56,7 @@ func loadDotEnv(path string) error {
 			return fmt.Errorf("invalid env key in line: %q", line)
 		}
 
-		if _, exists := os.LookupEnv(key); exists {
+		if existingValue, exists := os.LookupEnv(key); exists && strings.TrimSpace(existingValue) != "" {
 			continue
 		}
 
