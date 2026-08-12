@@ -4,7 +4,30 @@ import (
 	"context"
 	"errors"
 	"testing"
+
+	"github.com/LDKhangg/cinema-booking-go/pkg/apperror"
 )
+
+func assertAppError(t *testing.T, err error, wantCode string, wantMessage string) {
+	t.Helper()
+
+	if err == nil {
+		t.Fatal("expected error, got nil")
+	}
+
+	var appErr *apperror.AppError
+	if !errors.As(err, &appErr) {
+		t.Fatalf("expected *apperror.AppError, got %T (%v)", err, err)
+	}
+
+	if appErr.Code != wantCode {
+		t.Fatalf("expected code %q, got %q", wantCode, appErr.Code)
+	}
+
+	if appErr.Message != wantMessage {
+		t.Fatalf("expected message %q, got %q", wantMessage, appErr.Message)
+	}
+}
 
 type fakeTheaterRepo struct {
 	getTheatersResult []Theater
@@ -102,13 +125,7 @@ func TestTheaterServiceGetTheaterByIDValidation(t *testing.T) {
 	service := &theaterService{repo: repo}
 
 	_, err := service.GetTheaterByID(context.Background(), 0)
-	if err == nil {
-		t.Fatal("expected error, got nil")
-	}
-
-	if err.Error() != "ID rạp chiếu không hợp lệ" {
-		t.Fatalf("expected validation error, got %q", err.Error())
-	}
+	assertAppError(t, err, "bad_request", "ID rạp chiếu không hợp lệ")
 
 	if repo.getTheaterByIDCalled {
 		t.Fatal("expected GetTheaterByID not to be called")
@@ -188,13 +205,7 @@ func TestTheaterServiceCreateTheaterValidation(t *testing.T) {
 			service := &theaterService{repo: repo}
 
 			err := service.CreateTheater(context.Background(), tt.input)
-			if err == nil {
-				t.Fatal("expected error, got nil")
-			}
-
-			if err.Error() != tt.wantErr {
-				t.Fatalf("expected error %q, got %q", tt.wantErr, err.Error())
-			}
+			assertAppError(t, err, "bad_request", tt.wantErr)
 
 			if repo.createTheaterCalled {
 				t.Fatal("expected CreateTheater not to be called")
@@ -210,9 +221,7 @@ func TestTheaterServiceCreateTheaterRepoError(t *testing.T) {
 	theater := &Theater{Name: "CGV Vincom"}
 
 	err := service.CreateTheater(context.Background(), theater)
-	if err == nil {
-		t.Fatal("expected error, got nil")
-	}
+	assertAppError(t, err, "internal_error", "không thể tạo rạp mới")
 
 	if !errors.Is(err, repoErr) {
 		t.Fatalf("expected error %v, got %v", repoErr, err)
@@ -232,13 +241,7 @@ func TestTheaterServiceGetRoomsByTheaterIDValidation(t *testing.T) {
 	service := &theaterService{repo: repo}
 
 	_, err := service.GetRoomsByTheaterID(context.Background(), 0)
-	if err == nil {
-		t.Fatal("expected error, got nil")
-	}
-
-	if err.Error() != "ID rạp chiếu không hợp lệ" {
-		t.Fatalf("expected validation error, got %q", err.Error())
-	}
+	assertAppError(t, err, "bad_request", "ID rạp chiếu không hợp lệ")
 
 	if repo.getRoomsCalled {
 		t.Fatal("expected GetRoomsByTheaterID not to be called")
@@ -319,13 +322,7 @@ func TestTheaterServiceCreateRoomValidation(t *testing.T) {
 			service := &theaterService{repo: repo}
 
 			err := service.CreateRoom(context.Background(), tt.input)
-			if err == nil {
-				t.Fatal("expected error, got nil")
-			}
-
-			if err.Error() != tt.wantErr {
-				t.Fatalf("expected error %q, got %q", tt.wantErr, err.Error())
-			}
+			assertAppError(t, err, "bad_request", tt.wantErr)
 
 			if repo.createRoomCalled {
 				t.Fatal("expected CreateRoom not to be called")
@@ -341,9 +338,7 @@ func TestTheaterServiceCreateRoomRepoError(t *testing.T) {
 	room := &Room{TheatherID: 1, Name: "Room 1"}
 
 	err := service.CreateRoom(context.Background(), room)
-	if err == nil {
-		t.Fatal("expected error, got nil")
-	}
+	assertAppError(t, err, "internal_error", "không thể tạo phòng chiếu mới")
 
 	if !errors.Is(err, repoErr) {
 		t.Fatalf("expected error %v, got %v", repoErr, err)
@@ -359,13 +354,7 @@ func TestTheaterServiceGetSeatsByRoomIDValidation(t *testing.T) {
 	service := &theaterService{repo: repo}
 
 	_, err := service.GetSeatsByRoomID(context.Background(), 0)
-	if err == nil {
-		t.Fatal("expected error, got nil")
-	}
-
-	if err.Error() != "ID phòng chiếu không hợp lệ" {
-		t.Fatalf("expected validation error, got %q", err.Error())
-	}
+	assertAppError(t, err, "bad_request", "ID phòng chiếu không hợp lệ")
 
 	if repo.getSeatsCalled {
 		t.Fatal("expected GetSeatsByRoomID not to be called")
@@ -486,13 +475,7 @@ func TestTheaterServiceCreateSeatsValidation(t *testing.T) {
 			service := &theaterService{repo: repo}
 
 			err := service.CreateSeats(context.Background(), tt.roomID, tt.rows, tt.seatsPerRow)
-			if err == nil {
-				t.Fatal("expected error, got nil")
-			}
-
-			if err.Error() != tt.wantErr {
-				t.Fatalf("expected error %q, got %q", tt.wantErr, err.Error())
-			}
+			assertAppError(t, err, "bad_request", tt.wantErr)
 
 			if repo.createSeatsCalled {
 				t.Fatal("expected CreateSeats not to be called")
@@ -507,9 +490,7 @@ func TestTheaterServiceCreateSeatsRepoError(t *testing.T) {
 	service := &theaterService{repo: repo}
 
 	err := service.CreateSeats(context.Background(), 10, 3, 2)
-	if err == nil {
-		t.Fatal("expected error, got nil")
-	}
+	assertAppError(t, err, "internal_error", "không thể tạo ghế")
 
 	if !errors.Is(err, repoErr) {
 		t.Fatalf("expected error %v, got %v", repoErr, err)

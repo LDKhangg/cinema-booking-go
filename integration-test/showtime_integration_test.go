@@ -164,9 +164,9 @@ func TestShowtimeHTTPIntegration_RejectsOverlappingShowtime(t *testing.T) {
 		"start_time": startTime.Add(30 * time.Minute).Format(time.RFC3339),
 		"end_time":   endTime.Add(30 * time.Minute).Format(time.RFC3339),
 		"price":      100000,
-	}, http.StatusInternalServerError)
+	}, http.StatusConflict)
 
-	if strings.TrimSpace(overlapBody) != `{"error":"lịch chiếu bị trùng với suất chiếu khác trong cùng phòng"}` {
+	if strings.TrimSpace(overlapBody) != `{"code":"conflict","error":"lịch chiếu bị trùng với suất chiếu khác trong cùng phòng"}` {
 		t.Fatalf("overlap body = %s, want overlap error", strings.TrimSpace(overlapBody))
 	}
 }

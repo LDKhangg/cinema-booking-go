@@ -39,7 +39,7 @@ func (h *handler) CreateMovie(w http.ResponseWriter, req *http.Request) {
 
 	err := h.movieService.CreateMovie(req.Context(), &m)
 	if err != nil {
-		response.Error(w, http.StatusInternalServerError, err.Error())
+		response.FromError(w, err)
 		return
 	}
 	response.JSON(w, http.StatusCreated, m)
@@ -56,7 +56,7 @@ func (h *handler) CreateMovie(w http.ResponseWriter, req *http.Request) {
 func (h *handler) GetMovies(resp http.ResponseWriter, req *http.Request) {
 	movies, err := h.movieService.GetMovies(req.Context())
 	if err != nil {
-		response.Error(resp, http.StatusInternalServerError, err.Error())
+		response.FromError(resp, err)
 		return
 	}
 	response.JSON(resp, http.StatusOK, movies)
@@ -81,7 +81,7 @@ func (h *handler) GetMovieById(resp http.ResponseWriter, req *http.Request) {
 	}
 	movie, err := h.movieService.GetMovieById(req.Context(), id)
 	if err != nil {
-		response.Error(resp, http.StatusNotFound, "can not find movie")
+		response.FromError(resp, err)
 		return
 	}
 	response.JSON(resp, http.StatusOK, movie)
@@ -119,7 +119,7 @@ func (h *handler) UpdateMovie(w http.ResponseWriter, r *http.Request) {
 	m.ID = id
 
 	if err := h.movieService.UpdateMovie(r.Context(), &m); err != nil {
-		response.Error(w, http.StatusInternalServerError, err.Error())
+		response.FromError(w, err)
 		return
 	}
 
@@ -148,7 +148,7 @@ func (h *handler) DeleteMovie(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.movieService.DeleteMovie(r.Context(), id); err != nil {
-		response.Error(w, http.StatusInternalServerError, err.Error())
+		response.FromError(w, err)
 		return
 	}
 

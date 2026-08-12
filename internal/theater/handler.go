@@ -27,7 +27,7 @@ func NewHandler(service Service) *handler {
 func (h *handler) GetTheaters(w http.ResponseWriter, r *http.Request) {
 	theaters, err := h.theaterService.GetTheaters(r.Context())
 	if err != nil {
-		response.Error(w, http.StatusInternalServerError, err.Error())
+		response.FromError(w, err)
 		return
 	}
 	response.JSON(w, http.StatusOK, theaters)
@@ -52,7 +52,7 @@ func (h *handler) GetTheaterByID(w http.ResponseWriter, r *http.Request) {
 	}
 	theater, err := h.theaterService.GetTheaterByID(r.Context(), id)
 	if err != nil {
-		response.Error(w, http.StatusNotFound, err.Error())
+		response.FromError(w, err)
 		return
 	}
 	response.JSON(w, http.StatusOK, theater)
@@ -76,7 +76,7 @@ func (h *handler) CreateTheater(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := h.theaterService.CreateTheater(r.Context(), &t); err != nil {
-		response.Error(w, http.StatusInternalServerError, err.Error())
+		response.FromError(w, err)
 		return
 	}
 	response.JSON(w, http.StatusCreated, t)
@@ -101,7 +101,7 @@ func (h *handler) GetRoomsByTheaterID(w http.ResponseWriter, r *http.Request) {
 	}
 	rooms, err := h.theaterService.GetRoomsByTheaterID(r.Context(), id)
 	if err != nil {
-		response.Error(w, http.StatusInternalServerError, err.Error())
+		response.FromError(w, err)
 		return
 	}
 	response.JSON(w, http.StatusOK, rooms)
@@ -125,7 +125,7 @@ func (h *handler) CreateRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := h.theaterService.CreateRoom(r.Context(), &rm); err != nil {
-		response.Error(w, http.StatusInternalServerError, err.Error())
+		response.FromError(w, err)
 		return
 	}
 	response.JSON(w, http.StatusCreated, rm)
@@ -161,7 +161,7 @@ func (h *handler) CreateSeats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := h.theaterService.CreateSeats(r.Context(), roomID, req.Rows, req.SeatsPerRow); err != nil {
-		response.Error(w, http.StatusInternalServerError, err.Error())
+		response.FromError(w, err)
 		return
 	}
 	response.Success(w, http.StatusCreated, "Tạo ghế thành công", nil)
@@ -186,7 +186,7 @@ func (h *handler) GetSeatsByRoomID(w http.ResponseWriter, r *http.Request) {
 	}
 	seats, err := h.theaterService.GetSeatsByRoomID(r.Context(), roomID)
 	if err != nil {
-		response.Error(w, http.StatusInternalServerError, err.Error())
+		response.FromError(w, err)
 		return
 	}
 	response.JSON(w, http.StatusOK, seats)

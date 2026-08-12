@@ -35,7 +35,7 @@ func (h *handler) CreateShowtime(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := h.showtimeService.CreateShowtime(r.Context(), &st); err != nil {
-		response.Error(w, http.StatusInternalServerError, err.Error())
+		response.FromError(w, err)
 		return
 	}
 	response.JSON(w, http.StatusCreated, st)
@@ -60,7 +60,7 @@ func (h *handler) GetShowtimeByID(w http.ResponseWriter, r *http.Request) {
 	}
 	st, err := h.showtimeService.GetShowtimeByID(r.Context(), id)
 	if err != nil {
-		response.Error(w, http.StatusNotFound, err.Error())
+		response.FromError(w, err)
 		return
 	}
 	response.JSON(w, http.StatusOK, st)
@@ -104,7 +104,7 @@ func (h *handler) GetShowtimes(w http.ResponseWriter, r *http.Request) {
 		}
 		showtimes, err = h.showtimeService.GetShowtimesByMovie(r.Context(), movieID, targetDate)
 		if err != nil {
-			response.Error(w, http.StatusInternalServerError, err.Error())
+			response.FromError(w, err)
 			return
 		}
 	} else if theaterIDStr != "" {
@@ -115,7 +115,7 @@ func (h *handler) GetShowtimes(w http.ResponseWriter, r *http.Request) {
 		}
 		showtimes, err = h.showtimeService.GetShowtimesByTheater(r.Context(), theaterID, targetDate)
 		if err != nil {
-			response.Error(w, http.StatusInternalServerError, err.Error())
+			response.FromError(w, err)
 			return
 		}
 	} else {

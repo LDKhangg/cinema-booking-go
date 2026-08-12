@@ -163,7 +163,7 @@ func TestMovieHTTPIntegration_CreateUpdateGetListAndDeleteFlow(t *testing.T) {
 	}
 
 	missingBody := performRequest(t, router, http.MethodGet, fmt.Sprintf("/movies/%d", createdMovie.ID), nil, http.StatusNotFound)
-	if strings.TrimSpace(missingBody) != `{"error":"can not find movie"}` {
+	if strings.TrimSpace(missingBody) != `{"code":"not_found","error":"can not find movie"}` {
 		t.Fatalf("missing movie body = %s, want not found error", strings.TrimSpace(missingBody))
 	}
 }

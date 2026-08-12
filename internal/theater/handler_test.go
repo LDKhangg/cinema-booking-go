@@ -3,11 +3,12 @@ package theater
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/LDKhangg/cinema-booking-go/pkg/apperror"
 )
 
 type fakeTheaterService struct {
@@ -115,7 +116,7 @@ func TestHandlerGetTheaters(t *testing.T) {
 }
 
 func TestHandlerGetTheatersServiceError(t *testing.T) {
-	service := &fakeTheaterService{getTheatersErr: errors.New("db down")}
+	service := &fakeTheaterService{getTheatersErr: apperror.Internal("không thể lấy danh sách rạp", nil)}
 	h := NewHandler(service)
 	req := httptest.NewRequest(http.MethodGet, "/theaters", nil)
 	rec := httptest.NewRecorder()
@@ -126,7 +127,7 @@ func TestHandlerGetTheatersServiceError(t *testing.T) {
 		t.Fatalf("expected status 500, got %d", rec.Code)
 	}
 
-	if strings.TrimSpace(rec.Body.String()) != `{"error":"db down"}` {
+	if strings.TrimSpace(rec.Body.String()) != `{"code":"internal_error","error":"không thể lấy danh sách rạp"}` {
 		t.Fatalf("unexpected body: %s", rec.Body.String())
 	}
 }
@@ -177,7 +178,7 @@ func TestHandlerGetTheaterByIDSuccess(t *testing.T) {
 }
 
 func TestHandlerGetTheaterByIDServiceError(t *testing.T) {
-	service := &fakeTheaterService{getTheaterByIDErr: errors.New("not found")}
+	service := &fakeTheaterService{getTheaterByIDErr: apperror.NotFound("không tìm thấy rạp chiếu")}
 	h := NewHandler(service)
 	req := httptest.NewRequest(http.MethodGet, "/theaters/2", nil)
 	req.SetPathValue("id", "2")
@@ -187,6 +188,10 @@ func TestHandlerGetTheaterByIDServiceError(t *testing.T) {
 
 	if rec.Code != http.StatusNotFound {
 		t.Fatalf("expected status 404, got %d", rec.Code)
+	}
+
+	if strings.TrimSpace(rec.Body.String()) != `{"code":"not_found","error":"không tìm thấy rạp chiếu"}` {
+		t.Fatalf("unexpected body: %s", rec.Body.String())
 	}
 }
 
@@ -230,7 +235,7 @@ func TestHandlerCreateTheaterSuccess(t *testing.T) {
 }
 
 func TestHandlerCreateTheaterServiceError(t *testing.T) {
-	service := &fakeTheaterService{createTheaterErr: errors.New("insert failed")}
+	service := &fakeTheaterService{createTheaterErr: apperror.Internal("không thể tạo rạp mới", nil)}
 	h := NewHandler(service)
 	body := `{"name":"CGV Vincom","address":"123 Street","city":"HCM"}`
 	req := httptest.NewRequest(http.MethodPost, "/theaters", strings.NewReader(body))
@@ -240,6 +245,10 @@ func TestHandlerCreateTheaterServiceError(t *testing.T) {
 
 	if rec.Code != http.StatusInternalServerError {
 		t.Fatalf("expected status 500, got %d", rec.Code)
+	}
+
+	if strings.TrimSpace(rec.Body.String()) != `{"code":"internal_error","error":"không thể tạo rạp mới"}` {
+		t.Fatalf("unexpected body: %s", rec.Body.String())
 	}
 }
 
@@ -276,7 +285,7 @@ func TestHandlerGetRoomsByTheaterIDSuccess(t *testing.T) {
 }
 
 func TestHandlerGetRoomsByTheaterIDServiceError(t *testing.T) {
-	service := &fakeTheaterService{getRoomsByTheaterErr: errors.New("query rooms failed")}
+	service := &fakeTheaterService{getRoomsByTheaterErr: apperror.Internal("không thể lấy danh sách phòng chiếu", nil)}
 	h := NewHandler(service)
 	req := httptest.NewRequest(http.MethodGet, "/theaters/3/rooms", nil)
 	req.SetPathValue("id", "3")
@@ -288,7 +297,7 @@ func TestHandlerGetRoomsByTheaterIDServiceError(t *testing.T) {
 		t.Fatalf("expected status 500, got %d", rec.Code)
 	}
 
-	if strings.TrimSpace(rec.Body.String()) != `{"error":"query rooms failed"}` {
+	if strings.TrimSpace(rec.Body.String()) != `{"code":"internal_error","error":"không thể lấy danh sách phòng chiếu"}` {
 		t.Fatalf("unexpected body: %s", rec.Body.String())
 	}
 }
@@ -333,7 +342,7 @@ func TestHandlerCreateRoomSuccess(t *testing.T) {
 }
 
 func TestHandlerCreateRoomServiceError(t *testing.T) {
-	service := &fakeTheaterService{createRoomErr: errors.New("insert room failed")}
+	service := &fakeTheaterService{createRoomErr: apperror.Internal("không thể tạo phòng chiếu mới", nil)}
 	h := NewHandler(service)
 	body := `{"theather_id":1,"name":"Room 1","total_seats":50,"room_type":"2D"}`
 	req := httptest.NewRequest(http.MethodPost, "/theaters/rooms", strings.NewReader(body))
@@ -345,7 +354,7 @@ func TestHandlerCreateRoomServiceError(t *testing.T) {
 		t.Fatalf("expected status 500, got %d", rec.Code)
 	}
 
-	if strings.TrimSpace(rec.Body.String()) != `{"error":"insert room failed"}` {
+	if strings.TrimSpace(rec.Body.String()) != `{"code":"internal_error","error":"không thể tạo phòng chiếu mới"}` {
 		t.Fatalf("unexpected body: %s", rec.Body.String())
 	}
 }
@@ -415,7 +424,7 @@ func TestHandlerCreateSeatsSuccess(t *testing.T) {
 }
 
 func TestHandlerCreateSeatsServiceError(t *testing.T) {
-	service := &fakeTheaterService{createSeatsErr: errors.New("create seats failed")}
+	service := &fakeTheaterService{createSeatsErr: apperror.Internal("không thể tạo ghế", nil)}
 	h := NewHandler(service)
 	body := `{"rows":3,"seats_per_row":2}`
 	req := httptest.NewRequest(http.MethodPost, "/rooms/10/seats", strings.NewReader(body))
@@ -428,7 +437,7 @@ func TestHandlerCreateSeatsServiceError(t *testing.T) {
 		t.Fatalf("expected status 500, got %d", rec.Code)
 	}
 
-	if strings.TrimSpace(rec.Body.String()) != `{"error":"create seats failed"}` {
+	if strings.TrimSpace(rec.Body.String()) != `{"code":"internal_error","error":"không thể tạo ghế"}` {
 		t.Fatalf("unexpected body: %s", rec.Body.String())
 	}
 }
@@ -470,7 +479,7 @@ func TestHandlerGetSeatsByRoomIDSuccess(t *testing.T) {
 }
 
 func TestHandlerGetSeatsByRoomIDServiceError(t *testing.T) {
-	service := &fakeTheaterService{getSeatsByIDErr: errors.New("query seats failed")}
+	service := &fakeTheaterService{getSeatsByIDErr: apperror.Internal("không thể lấy danh sách ghế", nil)}
 	h := NewHandler(service)
 	req := httptest.NewRequest(http.MethodGet, "/rooms/10/seats", nil)
 	req.SetPathValue("id", "10")
@@ -482,7 +491,7 @@ func TestHandlerGetSeatsByRoomIDServiceError(t *testing.T) {
 		t.Fatalf("expected status 500, got %d", rec.Code)
 	}
 
-	if strings.TrimSpace(rec.Body.String()) != `{"error":"query seats failed"}` {
+	if strings.TrimSpace(rec.Body.String()) != `{"code":"internal_error","error":"không thể lấy danh sách ghế"}` {
 		t.Fatalf("unexpected body: %s", rec.Body.String())
 	}
 }
