@@ -275,6 +275,24 @@ func TestHandlerGetRoomsByTheaterIDSuccess(t *testing.T) {
 	}
 }
 
+func TestHandlerGetRoomsByTheaterIDServiceError(t *testing.T) {
+	service := &fakeTheaterService{getRoomsByTheaterErr: errors.New("query rooms failed")}
+	h := NewHandler(service)
+	req := httptest.NewRequest(http.MethodGet, "/theaters/3/rooms", nil)
+	req.SetPathValue("id", "3")
+	rec := httptest.NewRecorder()
+
+	h.GetRoomsByTheaterID(rec, req)
+
+	if rec.Code != http.StatusInternalServerError {
+		t.Fatalf("expected status 500, got %d", rec.Code)
+	}
+
+	if strings.TrimSpace(rec.Body.String()) != `{"error":"query rooms failed"}` {
+		t.Fatalf("unexpected body: %s", rec.Body.String())
+	}
+}
+
 func TestHandlerCreateRoomBadJSON(t *testing.T) {
 	service := &fakeTheaterService{}
 	h := NewHandler(service)
@@ -311,6 +329,24 @@ func TestHandlerCreateRoomSuccess(t *testing.T) {
 
 	if service.createRoomInput == nil || service.createRoomInput.Name != "Room 1" {
 		t.Fatalf("unexpected create room input: %+v", service.createRoomInput)
+	}
+}
+
+func TestHandlerCreateRoomServiceError(t *testing.T) {
+	service := &fakeTheaterService{createRoomErr: errors.New("insert room failed")}
+	h := NewHandler(service)
+	body := `{"theather_id":1,"name":"Room 1","total_seats":50,"room_type":"2D"}`
+	req := httptest.NewRequest(http.MethodPost, "/theaters/rooms", strings.NewReader(body))
+	rec := httptest.NewRecorder()
+
+	h.CreateRoom(rec, req)
+
+	if rec.Code != http.StatusInternalServerError {
+		t.Fatalf("expected status 500, got %d", rec.Code)
+	}
+
+	if strings.TrimSpace(rec.Body.String()) != `{"error":"insert room failed"}` {
+		t.Fatalf("unexpected body: %s", rec.Body.String())
 	}
 }
 
@@ -378,6 +414,25 @@ func TestHandlerCreateSeatsSuccess(t *testing.T) {
 	}
 }
 
+func TestHandlerCreateSeatsServiceError(t *testing.T) {
+	service := &fakeTheaterService{createSeatsErr: errors.New("create seats failed")}
+	h := NewHandler(service)
+	body := `{"rows":3,"seats_per_row":2}`
+	req := httptest.NewRequest(http.MethodPost, "/rooms/10/seats", strings.NewReader(body))
+	req.SetPathValue("id", "10")
+	rec := httptest.NewRecorder()
+
+	h.CreateSeats(rec, req)
+
+	if rec.Code != http.StatusInternalServerError {
+		t.Fatalf("expected status 500, got %d", rec.Code)
+	}
+
+	if strings.TrimSpace(rec.Body.String()) != `{"error":"create seats failed"}` {
+		t.Fatalf("unexpected body: %s", rec.Body.String())
+	}
+}
+
 func TestHandlerGetSeatsByRoomIDBadPath(t *testing.T) {
 	service := &fakeTheaterService{}
 	h := NewHandler(service)
@@ -411,5 +466,23 @@ func TestHandlerGetSeatsByRoomIDSuccess(t *testing.T) {
 
 	if !service.getSeatsCalled || service.getSeatsRoomID != 10 {
 		t.Fatal("expected GetSeatsByRoomID to be called with room id 10")
+	}
+}
+
+func TestHandlerGetSeatsByRoomIDServiceError(t *testing.T) {
+	service := &fakeTheaterService{getSeatsByIDErr: errors.New("query seats failed")}
+	h := NewHandler(service)
+	req := httptest.NewRequest(http.MethodGet, "/rooms/10/seats", nil)
+	req.SetPathValue("id", "10")
+	rec := httptest.NewRecorder()
+
+	h.GetSeatsByRoomID(rec, req)
+
+	if rec.Code != http.StatusInternalServerError {
+		t.Fatalf("expected status 500, got %d", rec.Code)
+	}
+
+	if strings.TrimSpace(rec.Body.String()) != `{"error":"query seats failed"}` {
+		t.Fatalf("unexpected body: %s", rec.Body.String())
 	}
 }
