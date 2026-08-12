@@ -68,7 +68,14 @@ func TestShowtimeRepositoryIntegration_CreateAndQueryByMovieRoomAndTheater(t *te
 		t.Fatalf("GetByRoomID() = %+v, want one showtime with ID %d", byRoom, st.ID)
 	}
 
-	byTheater, err := showtimeRepo.GetByTheaterID(ctx, theaterID, targetDate)
+	theaterLookupRepo, ok := showtimeRepo.(interface {
+		GetByTheaterID(ctx context.Context, theaterID int, targetDate time.Time) ([]showtime.Showtime, error)
+	})
+	if !ok {
+		t.Fatal("showtime repository does not implement GetByTheaterID")
+	}
+
+	byTheater, err := theaterLookupRepo.GetByTheaterID(ctx, theaterID, targetDate)
 	if err != nil {
 		t.Fatalf("GetByTheaterID() error = %v", err)
 	}
