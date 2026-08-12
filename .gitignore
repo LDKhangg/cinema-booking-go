@@ -1,5 +1,6 @@
 .serena/
 docs/superpowers/
+.env
 *.DS_Store
 bin/
 tmp/

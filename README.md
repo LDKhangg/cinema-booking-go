@@ -49,9 +49,30 @@ A robust backend REST API for a Cinema Booking system built with **Go** (Golang)
 docker compose up -d
 ```
 
-### 3. Run the Application
+### 3. Create Local Environment File
+```bash
+cp .env.example .env
+```
+
+You can edit `.env` if you want a different port or database DSN.
+
+### 4. Run the Application
 ```bash
 go run cmd/main.go
 ```
 
-The server will start on port `8080`.
+The app loads configuration from `.env` and environment variables.
+
+Current config keys:
+
+- `PORT`: optional, defaults to `8080`
+- `DB_DSN`: required, PostgreSQL connection string
+
+Example `.env`:
+
+```env
+PORT=8080
+DB_DSN=postgres://postgres:123456@localhost:5432/cinema_db?sslmode=disable
+```
+
+The server will start on port `8080` by default.

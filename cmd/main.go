@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -25,7 +24,7 @@ func main() {
 	}
 	db, err := database.NewPostgresDB(cfg.DatabaseDSN)
 	if err != nil {
-		log.Fatal("failed to connect db ", err)
+		log.Fatalf("Kết nối database thất bại: %v", err)
 	}
 	defer db.Close()
 
@@ -34,9 +33,9 @@ func main() {
 	if err := goose.Up(db, "."); err != nil {
 		log.Fatalf("Lỗi khi chạy Migration: %v", err)
 	}
-	fmt.Println("Đã kiểm tra và chạy Migration (nếu có) thành công!")
+	log.Println("Đã kiểm tra và chạy Migration (nếu có) thành công!")
 
-	fmt.Println("Connected DB")
+	log.Println("Connected DB")
 	router := server.SetupRouter(db)
 
 	log.Println("Server đang chạy tại", cfg.Port)
@@ -44,4 +43,3 @@ func main() {
 		log.Fatal("Khởi động server thất bại: ", err)
 	}
 }
-
